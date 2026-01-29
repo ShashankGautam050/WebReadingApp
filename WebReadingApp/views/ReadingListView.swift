@@ -8,43 +8,45 @@
 import SwiftUI
 
 struct ReadingListView: View {
-    @Bindable var readingDataViewMmodel : ReadingDataViewModel
+    @Bindable var readingDataViewMmodel: ReadingDataViewModel
     @Binding var selectedItem: ReadingItem?
-    @State private var isEditorPresented : Bool = false
-    
-    @State var navigateToDetail = NavigationPath()
+    @State private var isEditorPresented = false
+
     var body: some View {
-        NavigationStack(path : $navigateToDetail) {
-            List(readingDataViewMmodel.readingList,selection: $selectedItem){ item in
-                ReadingItemView(readingItem: item)
-                    .onTapGesture {
-                        navigateToDetail.append(item)
+        List(
+            $readingDataViewMmodel.readingList,
+            editActions: [.move, .delete],
+            selection: $selectedItem
+        ) { $item in
+
+            ReadingItemView(readingItem: $item)
+                .tag(item) // ⭐ REQUIRED
+                .swipeActions(edge: .leading) {
+                    Button {
+                        $item.hasFinished.wrappedValue.toggle() // ✅ mutate through the binding
+                    } label: {
+                        Text($item.hasFinished.wrappedValue ? "Undo" : "Finish")
                     }
-            }
-            .toolbar {
-                Button {
-                    print("clicked")
-                    isEditorPresented.toggle()
-                } label: {
-                    Image(systemName: "plus")
                 }
-                
-            }
-            .sheet(isPresented: $isEditorPresented) {
-                ReadingItemEditor(readingDataViewMmodel: readingDataViewMmodel)
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
-            }
-            .navigationDestination(for: ReadingItem.self) { item in
-                ReadingDetailView(readingItem: item)
-            }
+
         }
-        
+        .toolbar {
+            Button {
+                isEditorPresented.toggle()
+            } label: {
+                Image(systemName: "plus")
+            }
+            EditButton()
+        }
+        .sheet(isPresented: $isEditorPresented) {
+            ReadingItemEditor(readingDataViewMmodel: readingDataViewMmodel)
+                .presentationDetents([.medium])
+        }
     }
 }
 
 fileprivate struct ReadingItemView : View {
-    let readingItem : ReadingItem
+    @Binding var readingItem: ReadingItem
     var body : some View {
         HStack(alignment :.firstTextBaseline){
             Image(systemName: readingItem.hasFinished ? "book.fill" : "book")
