@@ -8,26 +8,36 @@
 import SwiftUI
 
 struct ReadingListView: View {
-    let items : [ReadingItem]
+    @Bindable var readingDataViewMmodel : ReadingDataViewModel
     @Binding var selectedItem: ReadingItem?
     @State private var isEditorPresented : Bool = false
+    
+    @State var navigateToDetail = NavigationPath()
     var body: some View {
-        List(items,selection: $selectedItem){ item in
-            ReadingItemView(readingItem: item)
-        }
-        .toolbar {
-            Button {
-                print("clicked")
-                isEditorPresented.toggle()
-            } label: {
-                Image(systemName: "plus")
+        NavigationStack(path : $navigateToDetail) {
+            List(readingDataViewMmodel.readingList,selection: $selectedItem){ item in
+                ReadingItemView(readingItem: item)
+                    .onTapGesture {
+                        navigateToDetail.append(item)
+                    }
             }
-
-        }
-        .sheet(isPresented: $isEditorPresented) {
-            ReadingItemEditor()
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
+            .toolbar {
+                Button {
+                    print("clicked")
+                    isEditorPresented.toggle()
+                } label: {
+                    Image(systemName: "plus")
+                }
+                
+            }
+            .sheet(isPresented: $isEditorPresented) {
+                ReadingItemEditor(readingDataViewMmodel: readingDataViewMmodel)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+            }
+            .navigationDestination(for: ReadingItem.self) { item in
+                ReadingDetailView(readingItem: item)
+            }
         }
         
     }
@@ -54,7 +64,7 @@ fileprivate struct ReadingItemView : View {
 #Preview {
     @State @Previewable var selectedItem : ReadingItem?
     NavigationStack {
-        ReadingListView(items: ReadingItem.examples, selectedItem: $selectedItem)
+        ReadingListView(readingDataViewMmodel: ReadingDataViewModel(), selectedItem: $selectedItem)
     }
 }
 

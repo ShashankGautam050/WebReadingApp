@@ -11,13 +11,11 @@ struct ContentView: View {
     //   make all the variables,instances,state
    //    and binding outside of the body variable
     
-    
-    
+    @State private var readingDataViewModel = ReadingDataViewModel()
     @State private var selectedItem: ReadingItem? = nil
     var body: some View {
-        
-        NavigationSplitView {
-           
+         NavigationSplitView {
+            ReadingListView(readingDataViewMmodel: readingDataViewModel, selectedItem: $selectedItem)
         } detail: {
             if let selectedItem {
                 Text(selectedItem.title)
