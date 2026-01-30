@@ -20,7 +20,7 @@ struct ContentView: View {
             ReadingListView(readingDataViewMmodel: readingDataViewModel, selectedItem: $selectedItem)
         } detail: {
             if let selectedItem {
-                Text(selectedItem.title)
+                ReadingDetailView(readingItem: selectedItem, readingDataViewModel: readingDataViewModel)
             } else {
                 ContentUnavailableView("Please select a book to read", image: "book")
             }

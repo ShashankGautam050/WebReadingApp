@@ -20,10 +20,10 @@ struct ReadingListView: View {
         ) { $item in
 
             ReadingItemView(readingItem: $item)
-                .tag(item) // ⭐ REQUIRED
+                .tag(item)
                 .swipeActions(edge: .leading) {
                     Button {
-                        $item.hasFinished.wrappedValue.toggle() // ✅ mutate through the binding
+                        $item.hasFinished.wrappedValue.toggle()
                     } label: {
                         Text($item.hasFinished.wrappedValue ? "Undo" : "Finish")
                     }

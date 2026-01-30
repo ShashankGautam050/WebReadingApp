@@ -19,10 +19,18 @@ class ReadingDataViewModel{
         guard let url = URL(string: urlString) else { return }
         //TODO show error to the user if url is not valid
         
+        addNewReadingItem(title: title, url: url)
+    }
+    
+    
+    func addNewReadingItem(title : String,url : URL){
+        //TODO show error to the user if url is not valid
+        
         let newItem = ReadingItem(title: title,url: url)
         readingList.append(newItem)
         save()
     }
+    
     func fileURL() -> URL {
         let directory = URL.documentsDirectory
         let url = directory.appendingPathComponent("readingList.json")
