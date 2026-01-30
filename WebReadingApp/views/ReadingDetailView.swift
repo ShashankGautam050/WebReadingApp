@@ -23,6 +23,19 @@ struct ReadingDetailView: View {
                         .tint(.red)
                 }
             }
+            
+            if let url = webViewState.successFullyGeneratePDFURL {
+                SuccessSavedFileView(url: url)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3){
+                            
+                            withAnimation(.bouncy(duration: 2)){
+                                webViewState.successFullyGeneratePDFURL = nil
+                            }
+                           
+                        }
+                    }
+            }
              WebNavigationBar(webViewState: webViewState)
                 .padding()
            
@@ -39,15 +52,28 @@ struct ReadingDetailView: View {
         }
         .toolbar {
             
-            if let new = webViewState.currentURL,webViewState.url != new {
-                Button("Create a new Reading") {
-                    readingDataViewModel.addNewReadingItem(title: webViewState.currentTitle ?? "title", url: new)
+            
+            Menu("More", systemImage: "ellipsis.circle") {
+                if let new = webViewState.currentURL,webViewState.url != new {
+                    Button("Create a new Reading") {
+                        readingDataViewModel.addNewReadingItem(title: webViewState.currentTitle ?? "title", url: new)
+                    }
+                }
+                Button {
+                    webViewState.createPDF()
+                } label: {
+                    Text("Save as a PDF")
                 }
             }
+          
+
         }
     }
 }
 
 #Preview {
-    ReadingDetailView(readingItem: ReadingItem.example, readingDataViewModel: ReadingDataViewModel())
+    NavigationStack {
+        ReadingDetailView(readingItem: ReadingItem.example, readingDataViewModel: ReadingDataViewModel())
+    }
+ 
 }

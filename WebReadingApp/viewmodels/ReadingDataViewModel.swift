@@ -32,11 +32,19 @@ class ReadingDataViewModel{
     }
     
     func fileURL() -> URL {
-        let directory = URL.documentsDirectory
+        let directory = supportDirectory() ?? URL.documentsDirectory
         let url = directory.appendingPathComponent("readingList.json")
         return url
     }
-    
+    func supportDirectory() -> URL? {
+        do {
+            return try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+
+        } catch {
+            print("error : \(error)")
+            return nil
+        }
+    }
     func save() {
         // first convert swift date type to data(which is binary)
         
