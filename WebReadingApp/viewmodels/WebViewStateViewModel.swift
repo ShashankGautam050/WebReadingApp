@@ -22,8 +22,10 @@ class WebViewStateViewModel {
 
     /// The URL that actually finished loading in WKWebView
     /// Used to prevent unnecessary reloads and detect redirects
+    /// 
     var currentURL: URL? = nil
     var successFullyGeneratePDFURL : URL? = nil
+    var generatedPDFURL: URL? = nil
     // MARK: - Loading & Error State
 
     /// `true` while a page is loading
@@ -124,31 +126,38 @@ class WebViewStateViewModel {
     
     func createPDF() {
         guard let webView else { return }
-        
+
         webView.createPDF { result in
-            switch result {
-            case .success(let data):
-                self.saveToDisk(data)
-                self.successFullyGeneratePDFURL = self.currentURL
-            case .failure(let error):
-                
-                print("error having : \(error)")
-                //TODO show error to the user
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let data):
+                    self.saveToDisk(data)
+                case .failure(let error):
+                    self.error = error
+                }
             }
         }
     }
+
   
-    func saveToDisk(_ data : Data){
+    func saveToDisk(_ data: Data) {
         let documentsURL = URL.documentsDirectory
         let title = webView?.title ?? "Untitled"
-        let documentURL = documentsURL.appendingPathComponent("\(title).pdf")
+
+        let safeTitle = title
+            .replacingOccurrences(of: "/", with: "-")
+            .replacingOccurrences(of: ":", with: "-")
+
+        let pdfURL = documentsURL.appendingPathComponent("\(safeTitle).pdf")
+
         do {
-           
-            try data.write(to: documentURL)
-            self.currentURL = documentURL
-            print("success : \(documentURL.absoluteString)")
+            try data.write(to: pdfURL)
+            self.generatedPDFURL = pdfURL   // ✅ correct state
+            print("✅ PDF saved:", pdfURL)
+            
         } catch {
-            print("error while saving the pdf to the disk")
+            self.error = error
         }
     }
+
 }

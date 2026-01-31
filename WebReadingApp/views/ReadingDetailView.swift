@@ -10,8 +10,9 @@ import SwiftUI
 struct ReadingDetailView: View {
     
     let readingItem : ReadingItem
-    @State private var webViewState = WebViewStateViewModel()
+    @Bindable var webViewState = WebViewStateViewModel()
     @Bindable  var readingDataViewModel :ReadingDataViewModel
+    @Bindable var pdf : PDFViewModel
     var body: some View {
         VStack {
             ZStack {
@@ -24,13 +25,13 @@ struct ReadingDetailView: View {
                 }
             }
             
-            if let url = webViewState.successFullyGeneratePDFURL {
+            if let url = webViewState.generatedPDFURL {
                 SuccessSavedFileView(url: url)
                     .onAppear {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 3){
                             
                             withAnimation(.bouncy(duration: 2)){
-                                webViewState.successFullyGeneratePDFURL = nil
+                                webViewState.generatedPDFURL = nil
                             }
                            
                         }
@@ -44,6 +45,11 @@ struct ReadingDetailView: View {
             guard let url = newValue.url else { return }
 //            webViewState.update(url)
             webViewState.userRequestedToOpen((url))
+        }
+        .onChange(of: webViewState.generatedPDFURL) { oldValue, newValue in
+            guard let _ = newValue else { return }
+            
+            pdf.loadPdfFiles()
         }
         .onAppear{
             guard let url = readingItem.url else { return }
@@ -73,7 +79,7 @@ struct ReadingDetailView: View {
 
 #Preview {
     NavigationStack {
-        ReadingDetailView(readingItem: ReadingItem.example, readingDataViewModel: ReadingDataViewModel())
+        ReadingDetailView(readingItem: ReadingItem.example, readingDataViewModel: ReadingDataViewModel(), pdf: PDFViewModel())
     }
  
 }
